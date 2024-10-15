@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt')
 
 
-exports.backenLogin = async function (req, res) {
+exports.backendLogin = async function (req, res) {
 // DB abfragen 
   };
 
