@@ -10,9 +10,9 @@ router.get('/', (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-//backend.backenLogin(req, res);
+backend.backenLogin(req, res);
     
-    const { username, password } = req.body;
+  /*  const { username, password } = req.body;
 
     const user = await USER.findOne({ 'user.username': username });
     if (!user) {
@@ -23,7 +23,7 @@ router.post('/login', async (req, res) => {
         return res.status(400).send('Ungültiges Passwort');
     }
 
-    res.send('Erfolgreich eingeloggt');
+    res.send('Erfolgreich eingeloggt');*/
 });
 
 
