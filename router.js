@@ -2,12 +2,16 @@ const express = require('express');
 const path = require('path');
 const USER = require('./models/user.js');
 const router = express.Router();
+//const backend = require('./controllers/backend.js')
+
 
 router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 router.post('/login', async (req, res) => {
+//backend.backenLogin(req, res);
+    
     const { username, password } = req.body;
 
     const user = await USER.findOne({ 'user.username': username });
