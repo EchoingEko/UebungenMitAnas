@@ -6,29 +6,45 @@ const router = express.Router();
 const backend = require('./controller/backend.js')
 //const backend = require('./controllers/backend.js')
 
-module.exports = function () {
+// module.exports = function () {
 router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
     //res.render('index.html') versuch mal mit render 
 });
-router.post('/login', function (req, res) {
-//router.post('/login', async (req, res) => {
+
+router.get('/backend', (req, res) => {
+    res.sendFile(path.join(__dirname, 'backend.html'));
+});
+
+router.get('/addUser', async (req, res) => {
+   const newUser = new USER({username:"erkan", password:"egal", role:"admin"});
+   await newUser.save();
+   res.status(200).send("erfolgreich gespeichert"); 
+});
+
+router.post('/', function (req, res) {
+// router.post('/', async (req, res) => {
 backend.backendLogin(req, res);
+
     
-  /*  const { username, password } = req.body;
+//     const { username, password } = req.body;
+//     console.log(username, password);
+// const findAllUsers = await USER.find();
+// console.log(findAllUsers);
+//     const user = await USER.findOne({ username: username });
+//     if (!user) {
+//         console.log("1");
+//         return res.status(400).send('Benutzer nicht gefunden');
+//     }
 
-    const user = await USER.findOne({ 'user.username': username });
-    if (!user) {
-        return res.status(400).send('Benutzer nicht gefunden');
-    }
+//     if (password !== user.password) {
+//         console.log("2");
+//         return res.status(400).send('Ungültiges Passwort');
+//     }
 
-    if (password !== user.user.password) {
-        return res.status(400).send('Ungültiges Passwort');
-    }
-
-    res.send('Erfolgreich eingeloggt');*/
+//     res.send('Erfolgreich eingeloggt');
 });
 
 
-  return router;
-};
+  module.exports = router;
+// };
