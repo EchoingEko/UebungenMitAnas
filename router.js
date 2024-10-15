@@ -4,7 +4,7 @@ const USER = require('./models/user.js');
 const router = express.Router();
 //const backend = require('./controllers/backend.js')
 
-
+module.exports = function () {
 router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
@@ -27,4 +27,5 @@ router.post('/login', async (req, res) => {
 });
 
 
-module.exports = router;
+  return router;
+};
