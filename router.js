@@ -7,10 +7,11 @@ const router = express.Router();
 module.exports = function () {
 router.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
+    //res.render('index.html') versuch mal mit render 
 });
-
-router.post('/login', async (req, res) => {
-backend.backenLogin(req, res);
+router.post('/login', function (req, res) {
+//router.post('/login', async (req, res) => {
+backend.backendLogin(req, res);
     
   /*  const { username, password } = req.body;
 
