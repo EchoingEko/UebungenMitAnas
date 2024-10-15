@@ -1,0 +1,43 @@
+1_ Login-Funktion mit Benutzerverwaltung
+Frontend: Erstelle eine Login-Seite mit HTML oder Jade (Pug). 
+Die Login-Seite sollte eine Anmeldung für einen Benutzer mit username und password ermöglichen.
+
+Backend:
+Lege ein Schema in models/user.js an, welches die folgenden Felder enthält:
+username: String
+password: String (verschlüsselt gespeichert)
+role: String (admin oder user)
+Implementiere die Login-Funktion:
+Wenn die Rolle admin ist, soll eine Middleware verwendet werden, um zu prüfen, ob der Benutzer Admin-Rechte hat.
+Speichere jede erfolgreiche Anmeldung im transaction Schema, mit den Feldern:
+action: login
+date: Datum der Anmeldung
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+2_Benutzerverwaltung mit DataTable und Ajax
+Frontend: Erstelle eine Tabelle mit DataTables, die die Benutzerdaten dynamisch über Ajax lädt.
+Füge oben einen Button „Add User“ hinzu, der zu einer Seite weiterleitet, auf der neue Benutzer hinzugefügt werden können.
+Zeige in der Tabelle die Benutzer-IDs an. 
+Wenn auf eine ID geklickt wird, sollte der Benutzer auf eine Bearbeitungsseite weitergeleitet werden (Target _blank), 
+um Benutzerdaten zu bearbeiten.
+
+Backend: Implementiere die Funktionen zum Abrufen und Bearbeiten von Benutzerdaten in controllers/backend.js:
+Nutze async/await, um die Datenbankabfragen effizient zu gestalten.
+Implementiere die Funktionen zum Hinzufügen und Löschen von Benutzern in der MongoDB.
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
+3_Benutzer hinzufügen mit Bild-Upload
+Erweitere die Funktion „Add User“:
+Implementiere einen Bild-Upload für den Benutzer.
+Verwende FilePond als Frontend-Tool für den Bild-Upload und Multer im Backend zur Speicherung.
+Erstelle ein zusätzliches Schema userImg, in dem die hochgeladenen Bilder gespeichert werden.
+Verknüpfe die Bild-ID als ref in das user Schema, sodass jedes Bild einem Benutzer zugeordnet werden kann.
+
+
+
+////////////////////////////////////////////////
+Das ist der Anfang sag bescheid wenn du mit Fertig bist, dann kommt noch viel mehr wenn du fragen hast ruf mich an
