@@ -11,7 +11,7 @@ mongoose.connect('mongodb://localhost/users')
 .then(() => console.log('Mit MongoDB verbunden'))
 .catch(err => console.log('Fehler bei der Verbindung zu MongoDB:', err));
 
-app.use(morgan('combined'));
+//app.use(morgan('combined'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({

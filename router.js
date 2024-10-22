@@ -7,7 +7,7 @@ const backend = require('./controller/backend.js')
 //const backend = require('./controllers/backend.js')
 
 // module.exports = function () {
-router.get('/', (req, res) => {
+router.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
     //res.render('index.html') versuch mal mit render 
 });
@@ -16,15 +16,35 @@ router.get('/backend', (req, res) => {
     res.sendFile(path.join(__dirname, 'backend.html'));
 });
 
-router.get('/addUser', async (req, res) => {
-   const newUser = new USER({username:"erkan", password:"egal", role:"admin"});
-   await newUser.save();
-   res.status(200).send("erfolgreich gespeichert"); 
+router.get('/registrieren', (req, res) => {
+    res.sendFile(path.join(__dirname, 'registrieren.html'));  // HTML-Seite senden
 });
 
-router.post('/', function (req, res) {
+
+router.post('/registrieren', backend.backendRegistration);
+router.post('/login', backend.backendLogin);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /*function (req, res) {*/
 // router.post('/', async (req, res) => {
-backend.backendLogin(req, res);
+//backend.backendLogin(req, res);
 
     
 //     const { username, password } = req.body;
@@ -43,7 +63,7 @@ backend.backendLogin(req, res);
 //     }
 
 //     res.send('Erfolgreich eingeloggt');
-});
+//}); 
 
 
   module.exports = router;
