@@ -62,7 +62,7 @@ exports.backendRegistration = async function createUser(req, res) {
     }
 };
 
-exports.backendEditUser = async function editUser(req,res) {
+exports.backendEditUser = async function editUser(req, res) {
     try {
         const userId = req.params.id;
         const user = await User.findById(userId);
@@ -124,6 +124,7 @@ exports.backendTableHTML = async function listUser(req, res) {
     
                     <div id="auth-links">
                         <h1>Wilkommen auf der Startseite</h1>
+                        <a href="/addUser"><button>Add User</button></a>
                         <a href="./logout">Logout</a>
                         <p>Hallo, ${user.username}! Du bist eingeloggt.</p>
                     </div>
@@ -167,7 +168,7 @@ exports.backendLogout = async function userLogout(req, res) {
     try {
         req.session.destroy(err => {
             if (err) {
-                return res.redirect('/'); 
+                return res.redirect('/');
             }
             res.clearCookie('connect.sid');
             res.redirect('/');

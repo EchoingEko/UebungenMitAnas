@@ -5,6 +5,8 @@ const app = express();
 const port = 3000;
 const morgan = require('morgan');
 const session = require('express-session');
+const path = require('path');
+const ejs = require('ejs');
 
 mongoose.connect('mongodb://localhost/users')
 // mongoose.connect('mongodb://localhost:27017/users')
@@ -19,7 +21,9 @@ app.use(session({
     saveUninitialized: true,
     resave: false
   }));
-app.set('view engine', 'html');
+
+app.set('web/views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 app.use('/', router);
 
