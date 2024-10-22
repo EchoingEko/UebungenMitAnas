@@ -6,23 +6,23 @@ const router = express.Router();
 const backend = require('./controller/backend.js')
 //const backend = require('./controllers/backend.js')
 
+
+router.get('/', (req,res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+})
+
 // module.exports = function () {
 router.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'login.html'));
     //res.render('index.html') versuch mal mit render 
 });
 
-router.get('/backend', (req, res) => {
-    res.sendFile(path.join(__dirname, 'backend.html'));
-});
-
 router.get('/registrieren', (req, res) => {
-    res.sendFile(path.join(__dirname, 'registrieren.html'));  // HTML-Seite senden
+    res.sendFile(path.join(__dirname, 'registrieren.html')); 
 });
 
-
-router.post('/registrieren', backend.backendRegistration);
 router.post('/login', backend.backendLogin);
+router.post('/registrieren', backend.backendRegistration);
 
 
 
@@ -37,10 +37,9 @@ router.post('/login', backend.backendLogin);
 
 
 
-
-
-
-
+// router.get('/backend', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'backend.html'));
+// });
 
     /*function (req, res) {*/
 // router.post('/', async (req, res) => {
