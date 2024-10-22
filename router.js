@@ -16,6 +16,7 @@ router.get('/registrieren', (req, res) => {
     res.sendFile(path.join(__dirname, 'registrieren.html'));
 });
 
+router.get('/edit/:id', backend.backendEditUser);
 router.get('/', backend.backendTableHTML);
 router.post('/login', backend.backendLogin);
 router.post('/registrieren', backend.backendRegistration);

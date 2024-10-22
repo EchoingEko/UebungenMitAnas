@@ -62,33 +62,43 @@ exports.backendRegistration = async function createUser(req, res) {
     }
 };
 
-exports.isAuthenticated = function isAuthenticated(req, res, next) {
-    if (req.session && req.session.user) {
-        return next();
-    } else {
-        res.status(401).send('Nicht autorisiert');
-    }
-}
+exports.backendEditUser = async function editUser(req,res) {
+    try {
+        const userId = req.params.id;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).send('Benutzer nicht gefunden');
+        }
+
+        res.send(`
+            <h1>Benutzerdetails</h1>
+            <p>ID: ${user._id}</p>
+            <p>Username: ${user.username}</p>
+            <p>Password: ${user.password}</p>
+            <a href="/">Zurück zur Startseite</a>
+        `);
+    } catch (error) {
+        console.error('Fehler beim Abrufen des Benutzers:', error);
+        res.status(500).send('Interner Serverfehler');
+    };
+};
 
 exports.backendTableHTML = async function listUser(req, res) {
     const user = req.session.user || null;
 
-    // Wenn der Benutzer eingeloggt ist, zeige die Tabelle an
     if (user) {
         try {
-            // Abrufen aller Benutzer
+
             const users = await User.find();
 
-            // HTML für die Tabelle erstellen
             let table = '<table><tr><th>ID</th><th>Username</th><th>Hashed Password</th></tr>';
             users.forEach(user => {
-                table += `<tr><td>${user._id}</td><td>${user.username}</td><td>${user.password}</td></tr>`;
+                table += `<tr><td><a href="/edit/${user._id}" target="_blank">${user._id}</a></td><td>${user.username}</td><td>${user.password}</td></tr>`;
             });
             table += '</table>';
 
             const userJSON = JSON.stringify(user);
-
-            // HTML-Antwort
             res.send(`
                     <!DOCTYPE html>
                     <html lang="en">
@@ -130,7 +140,6 @@ exports.backendTableHTML = async function listUser(req, res) {
             res.status(500).send('Interner Serverfehler');
         }
     } else {
-        // Wenn kein Benutzer eingeloggt ist, zeige nur Login/Registrieren-Links an
         res.send(`
                 <!DOCTYPE html>
                 <html lang="en">
