@@ -1,15 +1,10 @@
 const express = require('express');
 const path = require('path');
-const USER = require('./models/user.js');
+const User = require('./models/user.js');
 //const Transaction = require('./models/transaction.js')
 const router = express.Router();
 const backend = require('./controller/backend.js')
 //const backend = require('./controllers/backend.js')
-
-
-router.get('/', (req,res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-})
 
 // module.exports = function () {
 router.get('/login', (req, res) => {
@@ -18,13 +13,13 @@ router.get('/login', (req, res) => {
 });
 
 router.get('/registrieren', (req, res) => {
-    res.sendFile(path.join(__dirname, 'registrieren.html')); 
+    res.sendFile(path.join(__dirname, 'registrieren.html'));
 });
 
+router.get('/', backend.backendTableHTML);
 router.post('/login', backend.backendLogin);
 router.post('/registrieren', backend.backendRegistration);
-
-
+router.get('/logout', backend.backendLogout);
 
 
 
@@ -41,11 +36,11 @@ router.post('/registrieren', backend.backendRegistration);
 //     res.sendFile(path.join(__dirname, 'backend.html'));
 // });
 
-    /*function (req, res) {*/
+/*function (req, res) {*/
 // router.post('/', async (req, res) => {
 //backend.backendLogin(req, res);
 
-    
+
 //     const { username, password } = req.body;
 //     console.log(username, password);
 // const findAllUsers = await USER.find();
@@ -65,5 +60,5 @@ router.post('/registrieren', backend.backendRegistration);
 //}); 
 
 
-  module.exports = router;
+module.exports = router;
 // };

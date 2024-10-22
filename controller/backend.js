@@ -21,7 +21,8 @@ exports.backendLogin = async function loginUser(req, res) {
 
         const match = await bcrypt.compare(password, user.password);
         if (match) {
-            res.status(200).send('Login erfolgreich');
+            req.session.user = { id: user._id, username: user.username, role: user.role };
+            res.redirect('/');
         } else {
             res.status(400).send('Falsches Passwort');
         }
@@ -61,8 +62,112 @@ exports.backendRegistration = async function createUser(req, res) {
     }
 };
 
+exports.isAuthenticated = function isAuthenticated(req, res, next) {
+    if (req.session && req.session.user) {
+        return next();
+    } else {
+        res.status(401).send('Nicht autorisiert');
+    }
+}
+
+exports.backendTableHTML = async function listUser(req, res) {
+    const user = req.session.user || null;
+
+    // Wenn der Benutzer eingeloggt ist, zeige die Tabelle an
+    if (user) {
+        try {
+            // Abrufen aller Benutzer
+            const users = await User.find();
+
+            // HTML für die Tabelle erstellen
+            let table = '<table><tr><th>ID</th><th>Username</th><th>Hashed Password</th></tr>';
+            users.forEach(user => {
+                table += `<tr><td>${user._id}</td><td>${user.username}</td><td>${user.password}</td></tr>`;
+            });
+            table += '</table>';
+
+            const userJSON = JSON.stringify(user);
+
+            // HTML-Antwort
+            res.send(`
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Startseite</title>
+                        <style>
+                        table {
+                            width: 50%;
+                            border-collapse: collapse;
+                        }
+                        table, th, td {
+                            border: 1px solid black;
+                        }
+                        th, td {
+                            padding: 8px;
+                            text-align: left;
+                        }
+                    </style>
+                    </head>
+                    <body>
+    
+                    <div id="auth-links">
+                        <h1>Wilkommen auf der Startseite</h1>
+                        <a href="./logout">Logout</a>
+                        <p>Hallo, ${user.username}! Du bist eingeloggt.</p>
+                    </div>
+    
+                    <div id="user-table">
+                        ${table}  <!-- Tabelle hier einfügen -->
+                    </div>
+    
+                    </body>
+                    </html>
+                `);
+        } catch (error) {
+            console.error('Fehler beim Abrufen der Benutzer:', error);
+            res.status(500).send('Interner Serverfehler');
+        }
+    } else {
+        // Wenn kein Benutzer eingeloggt ist, zeige nur Login/Registrieren-Links an
+        res.send(`
+                <!DOCTYPE html>
+                <html lang="en">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>Startseite</title>
+                </head>
+                <body>
+    
+                <div id="auth-links">
+                    <h1>Wilkommen auf der Startseite</h1>
+                    <a href="./login">Login</a>
+                    <a href="./registrieren">Registrieren</a>
+                </div>
+    
+                </body>
+                </html>
+            `);
+    }
+};
 
 
+exports.backendLogout = async function userLogout(req, res) {
+    try {
+        req.session.destroy(err => {
+            if (err) {
+                return res.redirect('/'); 
+            }
+            res.clearCookie('connect.sid');
+            res.redirect('/');
+        });
+    } catch (error) {
+        console.error('Fehler beim Abrufen der Benutzer:', error);
+        res.status(500).send('Interner Serverfehler');
+    }
+}
 
 // exports.backendLogin = async function (req, res) {
 
