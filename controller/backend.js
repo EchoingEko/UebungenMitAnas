@@ -62,54 +62,59 @@ exports.backendRegistration = async function createUser(req, res) {
     }
 };
 
-exports.backendEditUser = async function editUser(req, res) {
-    try {
-        const userId = req.params.id;
-        const user = await User.findById(userId);
+exports.editOrUpdateUser = async function editOrUpdateUser(req, res) {
+    const userId = req.params.id;
 
-        if (!user) {
-            return res.status(404).send('Benutzer nicht gefunden');
+    if (req.method === 'GET') {
+        try {
+            const user = await User.findById(userId);
+
+            if (!user) {
+                return res.status(404).send('Benutzer nicht gefunden');
+            }
+
+            res.send(`
+                <h1>Benutzerdetails bearbeiten</h1>
+                <form action="/update/${user._id}" method="POST">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" value="${user.username}" required>
+                    <br>
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password">
+                    <br>
+                    <button type="submit">Änderungen speichern</button>
+                </form>
+                <a href="/">Zurück zur Startseite</a>
+            `);
+        } catch (error) {
+            console.error('Fehler beim Abrufen des Benutzers:', error);
+            res.status(500).send('Interner Serverfehler');
         }
+    } else if (req.method === 'POST') {
+        try {
+            const { username, password } = req.body;
 
-        res.send(`
-            <h1>Benutzerdetails bearbeiten</h1>
-            <form action="/update/${user._id}" method="POST">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" value="${user.username}" required>
-                <br>
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" value="${user.password}" required>
-                <br>
-                <button type="submit">Änderungen speichern</button>
-            </form>
-            <a href="/">Zurück zur Startseite</a>
-        `);
-    } catch (error) {
-        console.error('Fehler beim Abrufen des Benutzers:', error);
-        res.status(500).send('Interner Serverfehler');
-    };
-};
+            const user = await User.findById(userId);
 
-exports.updateUser = async function updateUser(req, res) {
-    try {
-        const userId = req.params.id;
-        const { username, password } = req.body;  // Hole die aktualisierten Daten aus dem Formular
+            if (!user) {
+                return res.status(404).send('Benutzer nicht gefunden');
+            }
+            if (password && password.trim() !== "") {
+                const saltRounds = 10;
+                user.password = await bcrypt.hash(password, saltRounds);
+            }
+            user.username = username;
 
-        const user = await User.findByIdAndUpdate(userId, { 
-            username: username, 
-            password: password 
-        });
+            await user.save();
 
-        if (!user) {
-            return res.status(404).send('Benutzer nicht gefunden');
+            res.redirect('/');
+        } catch (error) {
+            console.error('Fehler beim Aktualisieren des Benutzers:', error);
+            res.status(500).send('Interner Serverfehler');
         }
-
-        res.redirect('/');  // Zurück zur Startseite nach erfolgreicher Bearbeitung
-    } catch (error) {
-        console.error('Fehler beim Aktualisieren des Benutzers:', error);
-        res.status(500).send('Interner Serverfehler');
     }
 };
+
 
 
 

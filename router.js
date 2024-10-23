@@ -18,9 +18,8 @@ router.get('/login', (req, res) => {
 router.get('/registrieren', (req, res) => {
     res.render('registrieren');
 });
-
-router.get('/edit/:id', backend.backendEditUser);
-router.post('/update/:id', backend.updateUser);
+router.get('/edit/:id', backend.editOrUpdateUser);
+router.post('/update/:id', backend.editOrUpdateUser);
 router.post('/login', backend.backendLogin);
 router.post('/registrieren', backend.backendRegistration);
 router.get('/logout', backend.backendLogout);
