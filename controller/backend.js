@@ -115,7 +115,27 @@ exports.editOrUpdateUser = async function editOrUpdateUser(req, res) {
     }
 };
 
+exports.addUser = async function addUser (req, res) {
+    try {
+        const { username, password } = req.body;
 
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+        const newUser = new User({
+            username: username,
+            password: hashedPassword,
+            role: 'user' 
+        });
+
+        await newUser.save();
+
+        res.redirect('/'); 
+    } catch (error) {
+        console.error('Fehler beim Hinzufügen des Benutzers:', error);
+        res.status(500).send('Interner Serverfehler');
+    }
+};
 
 
 exports.tableEJS = async function dataTable(req, res) {

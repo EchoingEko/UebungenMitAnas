@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuen Benutzer hinzufügen</title>
+</head>
+<body>
+    <h1>Neuen Benutzer hinzufügen</h1>
+    <form action="/addUser" method="POST">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <br>
+        <label for="password">Passwort:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <button type="submit">Benutzer hinzufügen</button>
+    </form>
+    <a href="/">Zurück zur Startseite</a>
+</body>
+</html>

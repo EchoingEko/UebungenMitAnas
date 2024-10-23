@@ -18,16 +18,19 @@ router.get('/login', (req, res) => {
 router.get('/registrieren', (req, res) => {
     res.render('registrieren');
 });
+
+router.get('/addUser', (req, res) => {
+    res.render('addUser');
+});
+
 router.get('/edit/:id', backend.editOrUpdateUser);
 router.post('/update/:id', backend.editOrUpdateUser);
 router.post('/login', backend.backendLogin);
 router.post('/registrieren', backend.backendRegistration);
 router.get('/logout', backend.backendLogout);
 router.get('/', backend.tableEJS);
+router.post('/addUser', backend.addUser);
 
-router.get('/addUser', (req, res) => {
-    res.send("hallo neuer User");
-});
 
 
 
