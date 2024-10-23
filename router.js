@@ -20,10 +20,11 @@ router.get('/registrieren', (req, res) => {
 });
 
 router.get('/edit/:id', backend.backendEditUser);
-router.get('/', backend.backendTableHTML);
+router.post('/update/:id', backend.updateUser);
 router.post('/login', backend.backendLogin);
 router.post('/registrieren', backend.backendRegistration);
 router.get('/logout', backend.backendLogout);
+router.get('/', backend.tableEJS);
 
 router.get('/addUser', (req, res) => {
     res.send("hallo neuer User");

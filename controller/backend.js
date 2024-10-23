@@ -72,10 +72,16 @@ exports.backendEditUser = async function editUser(req, res) {
         }
 
         res.send(`
-            <h1>Benutzerdetails</h1>
-            <p>ID: ${user._id}</p>
-            <p>Username: ${user.username}</p>
-            <p>Password: ${user.password}</p>
+            <h1>Benutzerdetails bearbeiten</h1>
+            <form action="/update/${user._id}" method="POST">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" value="${user.username}" required>
+                <br>
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" value="${user.password}" required>
+                <br>
+                <button type="submit">Änderungen speichern</button>
+            </form>
             <a href="/">Zurück zur Startseite</a>
         `);
     } catch (error) {
@@ -84,85 +90,44 @@ exports.backendEditUser = async function editUser(req, res) {
     };
 };
 
-exports.backendTableHTML = async function listUser(req, res) {
+exports.updateUser = async function updateUser(req, res) {
+    try {
+        const userId = req.params.id;
+        const { username, password } = req.body;  // Hole die aktualisierten Daten aus dem Formular
+
+        const user = await User.findByIdAndUpdate(userId, { 
+            username: username, 
+            password: password 
+        });
+
+        if (!user) {
+            return res.status(404).send('Benutzer nicht gefunden');
+        }
+
+        res.redirect('/');  // Zurück zur Startseite nach erfolgreicher Bearbeitung
+    } catch (error) {
+        console.error('Fehler beim Aktualisieren des Benutzers:', error);
+        res.status(500).send('Interner Serverfehler');
+    }
+};
+
+
+
+exports.tableEJS = async function dataTable(req, res) {
     const user = req.session.user || null;
 
     if (user) {
         try {
-
             const users = await User.find();
-
-            let table = '<table><tr><th>ID</th><th>Username</th><th>Hashed Password</th></tr>';
-            users.forEach(user => {
-                table += `<tr><td><a href="/edit/${user._id}" target="_blank">${user._id}</a></td><td>${user.username}</td><td>${user.password}</td></tr>`;
-            });
-            table += '</table>';
-
-            const userJSON = JSON.stringify(user);
-            res.send(`
-                    <!DOCTYPE html>
-                    <html lang="en">
-                    <head>
-                        <meta charset="UTF-8">
-                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                        <title>Startseite</title>
-                        <style>
-                        table {
-                            width: 50%;
-                            border-collapse: collapse;
-                        }
-                        table, th, td {
-                            border: 1px solid black;
-                        }
-                        th, td {
-                            padding: 8px;
-                            text-align: left;
-                        }
-                    </style>
-                    </head>
-                    <body>
-    
-                    <div id="auth-links">
-                        <h1>Wilkommen auf der Startseite</h1>
-                        <a href="/addUser"><button>Add User</button></a>
-                        <a href="./logout">Logout</a>
-                        <p>Hallo, ${user.username}! Du bist eingeloggt.</p>
-                    </div>
-    
-                    <div id="user-table">
-                        ${table}  <!-- Tabelle hier einfügen -->
-                    </div>
-    
-                    </body>
-                    </html>
-                `);
+            res.render('table', { users, user });
         } catch (error) {
             console.error('Fehler beim Abrufen der Benutzer:', error);
             res.status(500).send('Interner Serverfehler');
         }
     } else {
-        res.send(`
-                <!DOCTYPE html>
-                <html lang="en">
-                <head>
-                    <meta charset="UTF-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                    <title>Startseite</title>
-                </head>
-                <body>
-    
-                <div id="auth-links">
-                    <h1>Wilkommen auf der Startseite</h1>
-                    <a href="./login">Login</a>
-                    <a href="./registrieren">Registrieren</a>
-                </div>
-    
-                </body>
-                </html>
-            `);
+        res.redirect('/login');
     }
 };
-
 
 exports.backendLogout = async function userLogout(req, res) {
     try {
@@ -224,3 +189,81 @@ exports.backendLogout = async function userLogout(req, res) {
 //   }
 // };
 
+// exports.backendTableHTML = async function listUser(req, res) {
+//     const user = req.session.user || null;
+
+//     if (user) {
+//         try {
+
+//             const users = await User.find();
+
+//             let table = '<table><tr><th>ID</th><th>Username</th><th>Hashed Password</th></tr>';
+//             users.forEach(user => {
+//                 table += `<tr><td><a href="/edit/${user._id}" target="_blank">${user._id}</a></td><td>${user.username}</td><td>${user.password}</td></tr>`;
+//             });
+//             table += '</table>';
+
+//             const userJSON = JSON.stringify(user);
+//             res.send(`
+//                     <!DOCTYPE html>
+//                     <html lang="en">
+//                     <head>
+//                         <meta charset="UTF-8">
+//                         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//                         <title>Startseite</title>
+//                         <style>
+//                         table {
+//                             width: 50%;
+//                             border-collapse: collapse;
+//                         }
+//                         table, th, td {
+//                             border: 1px solid black;
+//                         }
+//                         th, td {
+//                             padding: 8px;
+//                             text-align: left;
+//                         }
+//                     </style>
+//                     </head>
+//                     <body>
+    
+//                     <div id="auth-links">
+//                         <h1>Wilkommen auf der Startseite</h1>
+//                         <a href="/addUser"><button>Add User</button></a>
+//                         <a href="./logout">Logout</a>
+//                         <p>Hallo, ${user.username}! Du bist eingeloggt.</p>
+//                     </div>
+    
+//                     <div id="user-table">
+//                         ${table}  <!-- Tabelle hier einfügen -->
+//                     </div>
+    
+//                     </body>
+//                     </html>
+//                 `);
+//         } catch (error) {
+//             console.error('Fehler beim Abrufen der Benutzer:', error);
+//             res.status(500).send('Interner Serverfehler');
+//         }
+//     } else {
+//         res.send(`
+//                 <!DOCTYPE html>
+//                 <html lang="en">
+//                 <head>
+//                     <meta charset="UTF-8">
+//                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//                     <title>Startseite</title>
+//                 </head>
+//                 <body>
+    
+//                 <div id="auth-links">
+//                     <h1>Wilkommen auf der Startseite</h1>
+//                     <a href="./login">Login</a>
+//                     <a href="./registrieren">Registrieren</a>
+//                 </div>
+    
+//                 </body>
+//                 </html>
+//             `);
+//     }
+// };
