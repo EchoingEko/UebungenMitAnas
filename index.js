@@ -22,7 +22,7 @@ app.use(session({
     resave: false
   }));
 
-app.set('web/views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'web/views'));
 app.set('view engine', 'ejs');
 
 app.use('/', router);
