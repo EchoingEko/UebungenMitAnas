@@ -1,45 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benutzer Tabelle</title>
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-</head>
-<body>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Benutzer Tabelle</title>
+        <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    </head>
+    <body>
 
-<div id="auth-links">
-    <h1>Willkommen, <%= user.username %>!</h1>
-    <a href="/addUser"><button>Add User</button></a>
-    <a href="./logout">Logout</a>
-</div>
+    <div id="auth-links">
+        <h1>Willkommen, <%= user.username %>!</h1>
+        <a href="/addUser"><button>Add User</button></a>
+        <a href="./logout">Logout</a>
+    </div>
 
-<table id="userTable" class="display">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>Hashed Password</th>
-        </tr>
-    </thead>
-    <tbody>
-        <% users.forEach(function(user) { %>
+    <table id="userTable" class="display">
+        <thead>
             <tr>
-                <td><a href="/edit/<%= user._id %>" target="_blank"><%= user._id %></a></td>
-                <td><%= user.username %></td>
-                <td><%= user.password %></td>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Hashed Password</th>
             </tr>
-        <% }) %>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            <% users.forEach(function(user) { %>
+                <tr>
+                    <td><a href="/edit/<%= user._id %>" target="_blank"><%= user._id %></a></td>
+                    <td><%= user.username %></td>
+                    <td><%= user.password %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
 
-<script>
-    $(document).ready(function() {
-        $('#userTable').DataTable();
-    });
-</script>
+    <script>
+        $(document).ready(function() {
+            $('#userTable').DataTable();
+        });
+    </script>
 
-</body>
-</html>
+    </body>
+    </html>
