@@ -158,7 +158,8 @@ exports.backendLogout = async function userLogout(req, res) {
     try {
         req.session.destroy(err => {
             if (err) {
-                return res.redirect('/');
+                console.error('Fehler beim Zerstören der Sitzung:', err);
+                return res.status(500).send('Interner Serverfehler');
             }
             res.clearCookie('connect.sid');
             res.redirect('/');
