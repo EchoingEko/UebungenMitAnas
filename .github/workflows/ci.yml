@@ -62,5 +62,5 @@ jobs:
           MESSAGE="Testfehler:\n$TEST_ERRORS\nLinting-Fehler:\n$LINT_ERRORS"
           
           if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ] || [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
-            curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$MESSAGE\"}" https://hooks.slack.com/services/your/slack/webhook/url
+            curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$MESSAGE\"}" https://app.slack.com/client/T07UP5P59UG/C07U2SQPE76?ssb_vid=.b35651672e5603893527f59305ac68a6
           fi
