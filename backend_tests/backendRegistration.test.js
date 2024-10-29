@@ -34,15 +34,18 @@ describe('backendRegistration', () => {
     });
 
     it('should create a new user and return success message', async () => {
-        req.body = { username: 'a', password: 'a' };
+        const testUsername = req.body.username;
+        req.body = { username: testUsername, password: req.body.password };
+        
         User.findOne.mockResolvedValue(null);
         bcrypt.hash.mockResolvedValue('hashedpassword');
-
+    
         await backend.backendRegistration(req, res);
         expect(User.prototype.save).toHaveBeenCalled();
         expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.send).toHaveBeenCalledWith('Erfolgreich registriert: testuser');
+        expect(res.send).toHaveBeenCalledWith('Erfolgreich registriert: ' + testUsername);
     });
+    
 
     it('should return 500 on error', async () => {
         req.body = { username: 'a', password: 'a' };

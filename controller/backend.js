@@ -52,7 +52,7 @@ exports.backendRegistration = async function createUser(req, res) {
             username: username,
             password: hashedPassword
         });
-
+        console.log('Neuer Benutzer:', newUser);
         await newUser.save();
 
         res.status(200).send('Erfolgreich registriert: ' + newUser.username);
@@ -154,21 +154,16 @@ exports.tableEJS = async function dataTable(req, res) {
     }
 };
 
-exports.backendLogout = async function userLogout(req, res) {
-    try {
-        req.session.destroy(err => {
-            if (err) {
-                console.error('Fehler beim Zerstören der Sitzung:', err);
-                return res.status(500).send('Interner Serverfehler');
-            }
-            res.clearCookie('connect.sid');
-            res.redirect('/');
-        });
-    } catch (error) {
-        console.error('Fehler beim Abrufen der Benutzer:', error);
-        res.status(500).send('Interner Serverfehler');
-    }
-}
+exports.backendLogout = function userLogout(req, res) {
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Fehler beim Zerstören der Sitzung:', err);
+            return res.status(500).send('Interner Serverfehler');
+        }
+        res.clearCookie('connect.sid');
+        res.redirect('/');
+    });
+};
 
 // exports.backendLogin = async function (req, res) {
 

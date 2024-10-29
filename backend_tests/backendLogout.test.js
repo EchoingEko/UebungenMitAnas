@@ -4,12 +4,13 @@ const backend = require('../controller/backend.js');
 const bcrypt = require('bcrypt');
 const User = require('../models/user.js');
 
-
 jest.mock('bcrypt');
 jest.mock('../models/user');
 
 describe('userLogout', () => {
     let req, res;
+
+    //console.log(backend);
 
     beforeEach(() => {
         req = { session: { destroy: jest.fn() } };
@@ -21,18 +22,25 @@ describe('userLogout', () => {
         };
     });
 
-    it('should destroy the session and redirect', async () => {
+    it('should destroy the session and redirect', done => {
         req.session.destroy.mockImplementation(callback => callback(null));
-        await backend.userLogout(req, res);
-        expect(req.session.destroy).toHaveBeenCalled();
-        expect(res.clearCookie).toHaveBeenCalledWith('connect.sid');
-        expect(res.redirect).toHaveBeenCalledWith('/');
+        backend.backendLogout(req, res); 
+
+        process.nextTick(() => {
+            expect(req.session.destroy).toHaveBeenCalled();
+            expect(res.clearCookie).toHaveBeenCalledWith('connect.sid');
+            expect(res.redirect).toHaveBeenCalledWith('/');
+            done();
+        });
     });
 
-    it('should return 500 on error', async () => {
+    it('should return 500 on error', done => {
         req.session.destroy.mockImplementation(callback => callback(new Error('Zerstörungsfehler')));
-        await backend.userLogout(req, res);
-        expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.send).toHaveBeenCalledWith('Interner Serverfehler');
+        backend.backendLogout(req, res); 
+        process.nextTick(() => {
+            expect(res.status).toHaveBeenCalledWith(500);
+            expect(res.send).toHaveBeenCalledWith('Interner Serverfehler');
+            done();
+        });
     });
 });
