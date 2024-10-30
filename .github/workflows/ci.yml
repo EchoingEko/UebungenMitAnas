@@ -55,21 +55,24 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test, lint]
     steps:
-      - name: Send message to Zulip
-        run: |
-          TEST_ERRORS="${{ needs.test.outputs.result }}"
-          LINT_ERRORS="${{ needs.lint.outputs.result }}"
-          MESSAGE="Testfehler:\n$TEST_ERRORS\nLinting-Fehler:\n$LINT_ERRORS"
-          
-          if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ] || [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
-            echo "Sending message with errors..."
-            curl_command="curl -X POST -H 'Content-Type: application/json' --data '{\"type\": \"stream\", \"to\": \"${{ secrets.ZULIP_CHANNEL }}\", \"subject\": \"CI Status\", \"content\": \"$MESSAGE\"}' -u \"${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}\" https://ihkprojekt.zulipchat.com/api/v1/messages"
-            echo $curl_command
-            eval $curl_command || echo "Failed to send message"
-          else
-            MESSAGE="Tests erfolgreich oder keine Fehler gefunden."
-            echo "Sending success message..."
-            curl_command="curl -X POST -H 'Content-Type: application/json' --data '{\"type\": \"stream\", \"to\": \"${{ secrets.ZULIP_CHANNEL }}\", \"subject\": \"CI Status\", \"content\": \"$MESSAGE\"}' -u \"${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}\" https://ihkprojekt.zulipchat.com/api/v1/messages"
-            echo $curl_command
-            eval $curl_command || echo "Failed to send message"
-          fi
+    - name: Send message to Zulip
+      run: |
+        TEST_ERRORS="${{ needs.test.outputs.result }}"
+        LINT_ERRORS="${{ needs.lint.outputs.result }}"
+        MESSAGE="Testfehler:\n$TEST_ERRORS\nLinting-Fehler:\n$LINT_ERRORS"
+
+        echo "Test errors: $TEST_ERRORS"
+        echo "Lint errors: $LINT_ERRORS"
+
+        if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ] || [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
+          echo "Sending message with errors..."
+          curl_command="curl -X POST -H \"Content-Type: application/json\" --data '{\"type\": \"stream\", \"to\": \"${{ secrets.ZULIP_CHANNEL }}\", \"subject\": \"CI Status\", \"content\": \"$MESSAGE\"}' -u \"${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}\" https://ihkprojekt.zulipchat.com/api/v1/messages"
+          echo "Curl command: $curl_command"
+          eval $curl_command || echo "Failed to send message"
+        else
+          MESSAGE="Tests erfolgreich oder keine Fehler gefunden."
+          echo "Sending success message..."
+          curl_command="curl -X POST -H \"Content-Type: application/json\" --data '{\"type\": \"stream\", \"to\": \"${{ secrets.ZULIP_CHANNEL }}\", \"subject\": \"CI Status\", \"content\": \"$MESSAGE\"}' -u \"${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}\" https://ihkprojekt.zulipchat.com/api/v1/messages"
+          echo "Curl command: $curl_command"
+          eval $curl_command || echo "Failed to send message"
+        fi
