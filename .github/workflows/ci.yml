@@ -57,31 +57,27 @@ jobs:
     steps:
       - name: Send message to Zulip
         run: |
-          # Hole die Ergebnisse der Tests und Linter
-          TEST_ERRORS="${{ env.result }}"
-          LINT_ERRORS="${{ env.result }}"
-        
-          # Erstelle die Nachricht
-          MESSAGE="Testfehler:\n$TEST_ERRORS\nLinting-Fehler:\n$LINT_ERRORS"
+          # Hole die Ergebnisse der Tests und Linter aus den Umgebungsvariablen
+          TEST_ERRORS="${{ env.result }}" # aus dem test-Job
+          LINT_ERRORS="${{ env.result }}" # aus dem lint-Job
 
-          # Logging der Variablen zur Überprüfung
-          echo "TEST_ERRORS: $TEST_ERRORS"
-          echo "LINT_ERRORS: $LINT_ERRORS"
-          echo "MESSAGE: $MESSAGE"
-
-          # Sende die Nachricht an Zulip
-          echo "Sending message..."
-          curl_command="curl -X POST -H 'Content-Type: application/json' --data '{\"type\": \"stream\", \"to\": \"${{ secrets.ZULIP_CHANNEL }}\", \"subject\": \"CI Status\", \"content\": \"${MESSAGE}\"}' -u \"${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}\" https://ihkprojekt.zulipchat.com/api/v1/messages"
-          
-          # Logge den curl-Befehl
-          echo "Curl command: $curl_command"
-          
-          # Führe den curl-Befehl aus und fange Fehler ab
-          eval $curl_command || echo "Failed to send message"
-          
-          # Überprüfe die Ergebnisse und gib eine entsprechende Meldung aus
+          # Überprüfe, ob Fehler aufgetreten sind
           if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ] || [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
-            echo "Tests oder Linter haben Fehler gefunden."
+            # Sende Fehlernachricht
+            MESSAGE="Testfehler:\n$TEST_ERRORS\nLinting-Fehler:\n$LINT_ERRORS"
+            echo "Sending error message..."
+            curl -X POST -u "${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}" \
+                -d "type=stream" \
+                -d "to=${{ secrets.ZULIP_CHANNEL }}" \
+                -d "subject=CI Status" \
+                -d "content=$MESSAGE"
           else
-            echo "Tests erfolgreich oder keine Fehler gefunden."
+            # Sende Erfolgsmeldung
+            MESSAGE="Alle Tests und Linter haben erfolgreich bestanden."
+            echo "Sending success message..."
+            curl -X POST -u "${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}" \
+                -d "type=stream" \
+                -d "to=${{ secrets.ZULIP_CHANNEL }}" \
+                -d "subject=CI Status" \
+                -d "content=$MESSAGE"
           fi
