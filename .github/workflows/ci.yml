@@ -23,7 +23,7 @@ jobs:
       - name: Run tests
         run: |
           npm test > test_output.log || true
-          echo "TEST_RESULT=$(grep -E 'FAIL|ERROR' test_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
+          echo "TEST_ERRORS=$(grep -E 'FAIL|ERROR' test_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
 
   lint:
     runs-on: ubuntu-latest
@@ -39,7 +39,7 @@ jobs:
       - name: Run linter
         run: |
           npm run lint > lint_output.log || true
-          echo "LINT_RESULT=$(grep 'error' lint_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
+          echo "LINT_ERRORS=$(grep 'error' lint_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
 
   notify:
     runs-on: ubuntu-latest
@@ -50,18 +50,19 @@ jobs:
           ZULIP_BOT_EMAIL: ${{ secrets.ZULIP_BOT_EMAIL }}
           ZULIP_API_KEY: ${{ secrets.ZULIP_API_KEY }}
           ZULIP_CHANNEL: ${{ secrets.ZULIP_CHANNEL }}
-          TEST_ERRORS: ${{ env.TEST_RESULT }}
-          LINT_ERRORS: ${{ env.LINT_RESULT }}
+          TEST_ERRORS: ${{ env.TEST_ERRORS }}
+          LINT_ERRORS: ${{ env.LINT_ERRORS }}
         run: |
-          echo "TEST_ERRORS: $TEST_ERRORS"
-          echo "LINT_ERRORS: $LINT_ERRORS"
-
-          if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ] || [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
-            MESSAGE="Testfehler:\n$TEST_ERRORS\n\nLinting-Fehler:\n$LINT_ERRORS"
-            echo "Sending error message..."
-          else
+          MESSAGE=""
+          if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ]; then
+            MESSAGE+="Testfehler:\n$TEST_ERRORS\n\n"
+          fi
+          if [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
+            MESSAGE+="Linting-Fehler:\n$LINT_ERRORS\n"
+          fi
+          
+          if [ -z "$MESSAGE" ]; then
             MESSAGE="Alle Tests und der Linter sind erfolgreich durchgelaufen."
-            echo "Sending success message..."
           fi
           
           curl -X POST -u "${ZULIP_BOT_EMAIL}:${ZULIP_API_KEY}" \
