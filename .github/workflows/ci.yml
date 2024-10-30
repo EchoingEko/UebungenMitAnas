@@ -55,12 +55,15 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test, lint]
     steps:
-      - name: Send message to Slack
+      - name: Send message to Zulip
         run: |
           TEST_ERRORS="${{ needs.test.outputs.result }}"
           LINT_ERRORS="${{ needs.lint.outputs.result }}"
           MESSAGE="Testfehler:\n$TEST_ERRORS\nLinting-Fehler:\n$LINT_ERRORS"
           
           if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ] || [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
-            curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$MESSAGE\"}" https://app.slack.com/client/T07UP5P59UG/C07U2SQPE76?ssb_vid=.b35651672e5603893527f59305ac68a6
+            curl -X POST -H 'Content-Type: application/json' \
+            --data "{\"type\": \"stream\", \"to\": \"${{ secrets.ZULIP_CHANNEL }}\", \"content\": \"$MESSAGE\"}" \
+            -u "${{ secrets.ZULIP_EMAIL }}:${{ secrets.ZULIP_API_KEY }}" \
+            https://ihkprojekt.zulipchat.com/api/v1/messages
           fi

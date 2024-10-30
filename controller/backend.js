@@ -14,7 +14,7 @@ exports.backendLogin = async function loginUser(req, res) {
             return res.status(400).send('Benutzername und Passwort sind erforderlich');
         }
 
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ username: { $regex: new RegExp(`^${username}$`, 'i') } });
         if (!user) {
             return res.status(400).send('Benutzer nicht gefunden');
         }
@@ -35,7 +35,7 @@ exports.backendLogin = async function loginUser(req, res) {
 
 exports.backendRegistration = async function createUser(req, res) {
     try {
-        const htmlBackToLogin ='<br><a href="/login">Jetzt Einloggen!</a>';
+        const htmlBackToLogin = '<br><a href="/login">Jetzt Einloggen!</a>';
         const htmlBackToRegister = '<br><a href="/registrieren">Zurück zum Registrieren?</a>'
         const { username, password } = req.body;
 
@@ -117,7 +117,7 @@ exports.editOrUpdateUser = async function editOrUpdateUser(req, res) {
     }
 };
 
-exports.addUser = async function addUser (req, res) {
+exports.addUser = async function addUser(req, res) {
     try {
         const { username, password } = req.body;
 
@@ -127,12 +127,12 @@ exports.addUser = async function addUser (req, res) {
         const newUser = new User({
             username: username,
             password: hashedPassword,
-            role: 'user' 
+            role: 'user'
         });
 
         await newUser.save();
 
-        res.redirect('/'); 
+        res.redirect('/');
     } catch (error) {
         console.error('Fehler beim Hinzufügen des Benutzers:', error);
         res.status(500).send('Interner Serverfehler');
@@ -166,127 +166,3 @@ exports.backendLogout = function userLogout(req, res) {
         res.redirect('/');
     });
 };
-
-// exports.backendLogin = async function (req, res) {
-
-//     const { username, password } = req.body;
-//     //console.log(username, password);
-//     const findAllUsers = await User.find();
-//     //console.log(findAllUsers);
-//     const user = await User.findOne({ username: username });
-//     if (!user) {
-//         console.log("1");
-//         return res.status(400).send('Benutzer nicht gefunden');
-//     }
-//     if (password !== user.password) {
-//         console.log("2");
-//         return res.status(400).send('Ungültiges Passwort');
-//     }
-
-//     res.send('Erfolgreich eingeloggt');
-// };
-
-// exports.backendLogin = async function (req, res) {
-// // DB abfragen
-// try{
-//  const access = await User.findOne({ username: req.body.username, password:req.body.password  });
-//     if (!access || access.role !== 'admin') {
-//       return res.redirect('/');
-//     }
-//   const insertInTrans = new Transaction({
-//       action: 'Backend',
-//       login: req.body.username,
-//     });
-// await insertInTrans.save();
-
-// if (access.role === 'admin') {
-//       req.session.permission = 'admin';
-//       req.session.user = access;
-//       res.redirect('/backend')
-//     } else {
-//       res.redirect('/');
-//     }
-//   } catch (error) {
-//     console.log(error);
-//     res.redirect('/'); // Bei einem Fehler ebenfalls umleiten
-//   }
-// };
-
-// exports.backendTableHTML = async function listUser(req, res) {
-//     const user = req.session.user || null;
-
-//     if (user) {
-//         try {
-
-//             const users = await User.find();
-
-//             let table = '<table><tr><th>ID</th><th>Username</th><th>Hashed Password</th></tr>';
-//             users.forEach(user => {
-//                 table += `<tr><td><a href="/edit/${user._id}" target="_blank">${user._id}</a></td><td>${user.username}</td><td>${user.password}</td></tr>`;
-//             });
-//             table += '</table>';
-
-//             const userJSON = JSON.stringify(user);
-//             res.send(`
-//                     <!DOCTYPE html>
-//                     <html lang="en">
-//                     <head>
-//                         <meta charset="UTF-8">
-//                         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//                         <title>Startseite</title>
-//                         <style>
-//                         table {
-//                             width: 50%;
-//                             border-collapse: collapse;
-//                         }
-//                         table, th, td {
-//                             border: 1px solid black;
-//                         }
-//                         th, td {
-//                             padding: 8px;
-//                             text-align: left;
-//                         }
-//                     </style>
-//                     </head>
-//                     <body>
-    
-//                     <div id="auth-links">
-//                         <h1>Wilkommen auf der Startseite</h1>
-//                         <a href="/addUser"><button>Add User</button></a>
-//                         <a href="./logout">Logout</a>
-//                         <p>Hallo, ${user.username}! Du bist eingeloggt.</p>
-//                     </div>
-    
-//                     <div id="user-table">
-//                         ${table}  <!-- Tabelle hier einfügen -->
-//                     </div>
-    
-//                     </body>
-//                     </html>
-//                 `);
-//         } catch (error) {
-//             console.error('Fehler beim Abrufen der Benutzer:', error);
-//             res.status(500).send('Interner Serverfehler');
-//         }
-//     } else {
-//         res.send(`
-//                 <!DOCTYPE html>
-//                 <html lang="en">
-//                 <head>
-//                     <meta charset="UTF-8">
-//                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-//                     <title>Startseite</title>
-//                 </head>
-//                 <body>
-    
-//                 <div id="auth-links">
-//                     <h1>Wilkommen auf der Startseite</h1>
-//                     <a href="./login">Login</a>
-//                     <a href="./registrieren">Registrieren</a>
-//                 </div>
-    
-//                 </body>
-//                 </html>
-//             `);
-//     }
-// };
