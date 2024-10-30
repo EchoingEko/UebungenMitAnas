@@ -60,12 +60,12 @@ jobs:
           TEST_ERRORS="${{ needs.test.outputs.result }}"
           LINT_ERRORS="${{ needs.lint.outputs.result }}"
           MESSAGE="Testfehler:\n$TEST_ERRORS\nLinting-Fehler:\n$LINT_ERRORS"
-
+          
           echo "Sending message..."
-          curl_command="curl -X POST -H 'Content-Type: application/json' --data '{\"type\": \"stream\", \"to\": \"${{ secrets.ZULIP_CHANNEL }}\", \"topic\": \"CI Status\", \"content\": \"$MESSAGE\"}' -u \"${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}\" https://ihkprojekt.zulipchat.com/api/v1/messages"
+          curl_command="curl -X POST -H 'Content-Type: application/json' --data '{\"type\": \"stream\", \"to\": \"${{ secrets.ZULIP_CHANNEL }}\", \"topic\": \"CI Status\", \"content\": \"${MESSAGE}\"}' -u \"${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}\" https://ihkprojekt.zulipchat.com/api/v1/messages"
           echo $curl_command
           eval $curl_command || echo "Failed to send message"
-
+          
           if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ] || [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
             echo "Tests oder Linter haben Fehler gefunden."
           else
