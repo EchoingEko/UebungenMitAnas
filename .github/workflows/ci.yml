@@ -11,46 +11,34 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.10.0'
-
       - name: Install dependencies
-        run: npm ci 
-
+        run: npm ci
       - name: Run tests
-        id: jest
         run: |
-          npm test > test_output.log || true  # Leite die Ausgabe in eine Log-Datei und ignoriere den Fehler
-          cat test_output.log  # Gebe die Log-Ausgabe direkt aus
+          npm test > test_output.log || true
           echo "TEST_RESULT=$(grep -E 'FAIL|ERROR' test_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
 
   lint:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.10.0'
-
       - name: Install dependencies
-        run: npm ci 
-
+        run: npm ci
       - name: Run linter
-        id: eslint
         run: |
-          npm run lint > lint_output.log || true  # Leite die Ausgabe in eine Log-Datei und ignoriere den Fehler
-          cat lint_output.log  # Gebe die Log-Ausgabe direkt aus
+          npm run lint > lint_output.log || true
           echo "LINT_RESULT=$(grep 'error' lint_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
 
   notify:
@@ -58,36 +46,27 @@ jobs:
     needs: [test, lint]
     steps:
       - name: Send message to Zulip
+        env:
+          ZULIP_BOT_EMAIL: ${{ secrets.ZULIP_BOT_EMAIL }}
+          ZULIP_API_KEY: ${{ secrets.ZULIP_API_KEY }}
+          ZULIP_CHANNEL: ${{ secrets.ZULIP_CHANNEL }}
+          TEST_ERRORS: ${{ env.TEST_RESULT }}
+          LINT_ERRORS: ${{ env.LINT_RESULT }}
         run: |
-          # Hole die Ergebnisse der Tests und Linter aus den Umgebungsvariablen
-          TEST_ERRORS="${{ env.TEST_RESULT }}"
-          LINT_ERRORS="${{ env.LINT_RESULT }}"
-  
-          # Protokolliere die Variablen
           echo "TEST_ERRORS: $TEST_ERRORS"
           echo "LINT_ERRORS: $LINT_ERRORS"
-          
-          # Überprüfe, ob Fehler aufgetreten sind
+
           if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ] || [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
-            # Sende Fehlernachricht
-            MESSAGE="Testfehler:\n$TEST_ERRORS\nLinting-Fehler:\n$LINT_ERRORS"
+            MESSAGE="Testfehler:\n$TEST_ERRORS\n\nLinting-Fehler:\n$LINT_ERRORS"
             echo "Sending error message..."
-            curl_command="curl -X POST -u \"${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}\" \
-                -d \"type=stream\" \
-                -d \"to=${{ secrets.ZULIP_CHANNEL }}\" \
-                -d \"subject=CI Status\" \
-                -d \"content=$MESSAGE\" https://ihkprojekt.zulipchat.com/api/v1/messages"
-            echo "Curl command: $curl_command"  # Zeige den Curl-Befehl zur Überprüfung an
-            eval $curl_command || echo "Failed to send message"
           else
-            # Sende Erfolgsmeldung
-            MESSAGE="Alle Tests und Linter haben erfolgreich bestanden."
+            MESSAGE="Alle Tests und der Linter sind erfolgreich durchgelaufen."
             echo "Sending success message..."
-            curl_command="curl -X POST -u \"${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}\" \
-                -d \"type=stream\" \
-                -d \"to=${{ secrets.ZULIP_CHANNEL }}\" \
-                -d \"subject=CI Status\" \
-                -d \"content=$MESSAGE\" https://ihkprojekt.zulipchat.com/api/v1/messages"
-            echo "Curl command: $curl_command"  # Zeige den Curl-Befehl zur Überprüfung an
-            eval $curl_command || echo "Failed to send message"
           fi
+          
+          curl -X POST -u "${ZULIP_BOT_EMAIL}:${ZULIP_API_KEY}" \
+            -d "type=stream" \
+            -d "to=${ZULIP_CHANNEL}" \
+            -d "subject=CI Status" \
+            -d "content=$MESSAGE" \
+            https://ihkprojekt.zulipchat.com/api/v1/messages
