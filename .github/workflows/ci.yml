@@ -11,65 +11,65 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.10.0'
-
       - name: Install dependencies
-        run: npm ci 
-
+        run: npm ci
       - name: Run tests
-        id: jest
         run: |
-          npm test > test_output.log || true  # Leite die Ausgabe in eine Log-Datei und ignoriere den Fehler
-          echo "::set-output name=result::$(grep -E 'FAIL|ERROR' test_output.log || echo 'Keine Fehler gefunden')"
+          npm test > test_output.log || true
+          TEST_ERRORS=$(grep -E 'FAIL|ERROR' test_output.log || echo '')
+          echo "TEST_ERRORS=$TEST_ERRORS" >> $GITHUB_ENV
 
   lint:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.10.0'
-
       - name: Install dependencies
-        run: npm ci 
-
+        run: npm ci
       - name: Run linter
-        id: eslint
         run: |
-          npm run lint > lint_output.log || true  # Leite die Ausgabe in eine Log-Datei und ignoriere den Fehler
-          echo "::set-output name=result::$(grep 'error' lint_output.log || echo 'Keine Fehler gefunden')"
+          npm run lint > lint_output.log || true
+          LINT_ERRORS=$(grep 'error' lint_output.log || echo '')
+          echo "LINT_ERRORS=$LINT_ERRORS" >> $GITHUB_ENV
 
   notify:
     runs-on: ubuntu-latest
     needs: [test, lint]
     steps:
       - name: Send message to Zulip
+        env:
+          ZULIP_BOT_EMAIL: ${{ secrets.ZULIP_BOT_EMAIL }}
+          ZULIP_API_KEY: ${{ secrets.ZULIP_API_KEY }}
+          ZULIP_CHANNEL: ${{ secrets.ZULIP_CHANNEL }}
+          TEST_ERRORS: ${{ env.TEST_ERRORS }}
+          LINT_ERRORS: ${{ env.LINT_ERRORS }}
         run: |
-          TEST_ERRORS="${{ needs.test.outputs.result }}"
-          LINT_ERRORS="${{ needs.lint.outputs.result }}"
-          MESSAGE="Testfehler:\n$TEST_ERRORS\nLinting-Fehler:\n$LINT_ERRORS"
-          
-          if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ] || [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
-            curl -X POST -H 'Content-Type: application/json' \
-            --data "{\"type\": \"stream\", \"to\": \"${{ secrets.ZULIP_CHANNEL }}\", \"topic\": \"CI Status\", \"content\": \"$MESSAGE\"}" \
-            -u "${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}" \
-            https://ihkprojekt.zulipchat.com/api/v1/send_message || echo "Failed to send message"
-          else
-            MESSAGE="Tests erfolgreich oder keine Fehler gefunden."
-            curl -X POST -H 'Content-Type: application/json' \
-            --data "{\"type\": \"stream\", \"to\": \"${{ secrets.ZULIP_CHANNEL }}\", \"topic\": \"CI Status\", \"content\": \"$MESSAGE\"}" \
-            -u "${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}" \
-            https://ihkprojekt.zulipchat.com/api/v1/send_message || echo "Failed to send message"
+          MESSAGE=""
+          if [ -n "$TEST_ERRORS" ]; then
+            MESSAGE+="Testfehler:\n$TEST_ERRORS\n\n"
           fi
+          if [ -n "$LINT_ERRORS" ]; then
+            MESSAGE+="Linting-Fehler:\n$LINT_ERRORS\n"
+          fi
+          
+          if [ -z "$MESSAGE" ]; then
+            MESSAGE="Alle Tests und der Linter sind erfolgreich durchgelaufen."
+          fi
+          
+          curl -X POST -u "${ZULIP_BOT_EMAIL}:${ZULIP_API_KEY}" \
+            -d "type=stream" \
+            -d "to=${ZULIP_CHANNEL}" \
+            -d "subject=CI Status" \
+            -d "content=$MESSAGE" \
+            https://ihkprojekt.zulipchat.com/api/v1/messages
