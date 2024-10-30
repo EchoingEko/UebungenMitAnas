@@ -28,7 +28,7 @@ jobs:
         id: jest
         run: |
           npm test > test_output.log || true  # Leite die Ausgabe in eine Log-Datei und ignoriere den Fehler
-          echo "result=$(grep -E 'FAIL|ERROR' test_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
+          echo "TEST_RESULT=$(grep -E 'FAIL|ERROR' test_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
 
   lint:
     runs-on: ubuntu-latest
@@ -49,7 +49,7 @@ jobs:
         id: eslint
         run: |
           npm run lint > lint_output.log || true  # Leite die Ausgabe in eine Log-Datei und ignoriere den Fehler
-          echo "result=$(grep 'error' lint_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
+          echo "LINT_RESULT=$(grep 'error' lint_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
 
   notify:
     runs-on: ubuntu-latest
@@ -58,8 +58,8 @@ jobs:
       - name: Send message to Zulip
         run: |
           # Hole die Ergebnisse der Tests und Linter aus den Umgebungsvariablen
-          TEST_ERRORS="${{ env.result }}" # aus dem test-Job
-          LINT_ERRORS="${{ env.result }}" # aus dem lint-Job
+          TEST_ERRORS="${{ env.TEST_RESULT }}"
+          LINT_ERRORS="${{ env.LINT_RESULT }}"
 
           # Überprüfe, ob Fehler aufgetreten sind
           if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ] || [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
