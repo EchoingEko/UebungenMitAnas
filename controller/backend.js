@@ -35,15 +35,17 @@ exports.backendLogin = async function loginUser(req, res) {
 
 exports.backendRegistration = async function createUser(req, res) {
     try {
+        const htmlBackToLogin ='<br><a href="/login">Jetzt Einloggen!</a>';
+        const htmlBackToRegister = '<br><a href="/registrieren">Zurück zum Registrieren?</a>'
         const { username, password } = req.body;
 
         if (!username || !password) {
-            return res.status(400).send('Benutzername und Passwort sind erforderlich');
+            return res.status(400).send('Benutzername und Passwort sind erforderlich' + htmlBackToRegister);
         }
 
         const existingUser = await User.findOne({ username });
         if (existingUser) {
-            return res.status(400).send('Benutzername bereits vergeben');
+            return res.status(400).send('Benutzername bereits vergeben' + htmlBackToRegister);
         }
 
         const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -55,7 +57,7 @@ exports.backendRegistration = async function createUser(req, res) {
         console.log('Neuer Benutzer:', newUser);
         await newUser.save();
 
-        res.status(200).send('Erfolgreich registriert: ' + newUser.username);
+        res.status(200).send('Erfolgreich registriert: ' + newUser.username + htmlBackToLogin);
     } catch (err) {
         console.error('Fehler bei der Registrierung:', err);
         res.status(500).send('Interner Serverfehler');

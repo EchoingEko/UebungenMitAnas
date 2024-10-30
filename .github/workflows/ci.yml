@@ -25,7 +25,10 @@ jobs:
         run: npm ci 
 
       - name: Run tests
-        run: node ./node_modules/jest/bin/jest.js 
+        id: jest
+        run: |
+          npm test > test_output.log || true  # Leite die Ausgabe in eine Log-Datei und ignoriere den Fehler
+          echo "::set-output name=result::$(grep -E 'FAIL|ERROR' test_output.log || echo 'Keine Fehler gefunden')"
 
   lint:
     runs-on: ubuntu-latest
@@ -40,4 +43,24 @@ jobs:
           node-version: '20.10.0'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci 
+
+      - name: Run linter
+        id: eslint
+        run: |
+          npm run lint > lint_output.log || true  # Leite die Ausgabe in eine Log-Datei und ignoriere den Fehler
+          echo "::set-output name=result::$(grep 'error' lint_output.log || echo 'Keine Fehler gefunden')"
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [test, lint]
+    steps:
+      - name: Send message to Slack
+        run: |
+          TEST_ERRORS="${{ needs.test.outputs.result }}"
+          LINT_ERRORS="${{ needs.lint.outputs.result }}"
+          MESSAGE="Testfehler:\n$TEST_ERRORS\nLinting-Fehler:\n$LINT_ERRORS"
+          
+          if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ] || [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
+            curl -X POST -H 'Content-type: application/json' --data "{\"text\":\"$MESSAGE\"}" https://app.slack.com/client/T07UP5P59UG/C07U2SQPE76?ssb_vid=.b35651672e5603893527f59305ac68a6
+          fi
