@@ -4,20 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Neuen Benutzer hinzufügen</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href=/web/views/styles.css>
 </head>
 <body>
-    <h1>Neuen Benutzer hinzufügen</h1>
-    <form action="/addUser" method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <br>
-        <label for="password">Passwort:</label>
-        <input type="password" id="password" name="password" required>
-        <br>
-        <label for="bild">Bild:</label>
-        <input type="password" id="password" name="password" required>
-        <button type="submit">Benutzer hinzufügen</button>
-    </form>
-    <a href="/">Zurück zur Startseite</a>
+    <div class="container my-5">
+        <div class="card mx-auto" style="max-width: 500px;">
+            <div class="card-header text-center">
+                <h2>Neuen Benutzer hinzufügen</h2>
+            </div>
+            <div class="card-body">
+                <form action="/addUser" method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username:</label>
+                        <input type="text" id="username" name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Passwort:</label>
+                        <input type="password" id="password" name="password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bild" class="form-label">Bild:</label>
+                        <input type="file" id="bild" name="bild" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Benutzer hinzufügen</button>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <a href="/" class="btn btn-link">Zurück zur Startseite</a>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
