@@ -28,7 +28,7 @@ jobs:
         id: jest
         run: |
           npm test > test_output.log || true  # Leite die Ausgabe in eine Log-Datei und ignoriere den Fehler
-          echo "::set-output name=result::$(grep -E 'FAIL|ERROR' test_output.log || echo 'Keine Fehler gefunden')"
+          echo "result=$(grep -E 'FAIL|ERROR' test_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
 
   lint:
     runs-on: ubuntu-latest
@@ -49,7 +49,7 @@ jobs:
         id: eslint
         run: |
           npm run lint > lint_output.log || true  # Leite die Ausgabe in eine Log-Datei und ignoriere den Fehler
-          echo "::set-output name=result::$(grep 'error' lint_output.log || echo 'Keine Fehler gefunden')"
+          echo "result=$(grep 'error' lint_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
 
   notify:
     runs-on: ubuntu-latest
@@ -57,15 +57,29 @@ jobs:
     steps:
       - name: Send message to Zulip
         run: |
-          TEST_ERRORS="${{ needs.test.outputs.result }}"
-          LINT_ERRORS="${{ needs.lint.outputs.result }}"
+          # Hole die Ergebnisse der Tests und Linter
+          TEST_ERRORS="${{ env.result }}"
+          LINT_ERRORS="${{ env.result }}"
+        
+          # Erstelle die Nachricht
           MESSAGE="Testfehler:\n$TEST_ERRORS\nLinting-Fehler:\n$LINT_ERRORS"
-          
+
+          # Logging der Variablen zur Überprüfung
+          echo "TEST_ERRORS: $TEST_ERRORS"
+          echo "LINT_ERRORS: $LINT_ERRORS"
+          echo "MESSAGE: $MESSAGE"
+
+          # Sende die Nachricht an Zulip
           echo "Sending message..."
-          curl_command="curl -X POST -H 'Content-Type: application/json' --data '{\"type\": \"stream\", \"to\": \"${{ secrets.ZULIP_CHANNEL }}\", \"topic\": \"CI Status\", \"content\": \"${MESSAGE}\"}' -u \"${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}\" https://ihkprojekt.zulipchat.com/api/v1/messages"
-          echo $curl_command
+          curl_command="curl -X POST -H 'Content-Type: application/json' --data '{\"type\": \"stream\", \"to\": \"${{ secrets.ZULIP_CHANNEL }}\", \"subject\": \"CI Status\", \"content\": \"${MESSAGE}\"}' -u \"${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}\" https://ihkprojekt.zulipchat.com/api/v1/messages"
+          
+          # Logge den curl-Befehl
+          echo "Curl command: $curl_command"
+          
+          # Führe den curl-Befehl aus und fange Fehler ab
           eval $curl_command || echo "Failed to send message"
           
+          # Überprüfe die Ergebnisse und gib eine entsprechende Meldung aus
           if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ] || [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
             echo "Tests oder Linter haben Fehler gefunden."
           else
