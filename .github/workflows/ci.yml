@@ -23,7 +23,8 @@ jobs:
       - name: Run tests
         run: |
           npm test > test_output.log || true
-          echo "TEST_ERRORS=$(grep -E 'FAIL|ERROR' test_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
+          TEST_ERRORS=$(grep -E 'FAIL|ERROR' test_output.log || echo '')
+          echo "TEST_ERRORS=$TEST_ERRORS" >> $GITHUB_ENV
 
   lint:
     runs-on: ubuntu-latest
@@ -39,7 +40,8 @@ jobs:
       - name: Run linter
         run: |
           npm run lint > lint_output.log || true
-          echo "LINT_ERRORS=$(grep 'error' lint_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
+          LINT_ERRORS=$(grep 'error' lint_output.log || echo '')
+          echo "LINT_ERRORS=$LINT_ERRORS" >> $GITHUB_ENV
 
   notify:
     runs-on: ubuntu-latest
@@ -54,10 +56,10 @@ jobs:
           LINT_ERRORS: ${{ env.LINT_ERRORS }}
         run: |
           MESSAGE=""
-          if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ]; then
+          if [ -n "$TEST_ERRORS" ]; then
             MESSAGE+="Testfehler:\n$TEST_ERRORS\n\n"
           fi
-          if [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
+          if [ -n "$LINT_ERRORS" ]; then
             MESSAGE+="Linting-Fehler:\n$LINT_ERRORS\n"
           fi
           
