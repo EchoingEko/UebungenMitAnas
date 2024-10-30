@@ -25,6 +25,7 @@
             <tr>
                 <th>ID</th>
                 <th>Username</th>
+                <th>Email</th> 
                 <th>Hashed Password</th>
             </tr>
         </thead>
@@ -33,6 +34,7 @@
                 <tr>
                     <td><a href="/edit/<%= user._id %>" target="_blank"><%= user._id %></a></td>
                     <td><%= user.username %></td>
+                    <td><%= user.email %></td> 
                     <td><%= user.password %></td>
                 </tr>
             <% }) %>

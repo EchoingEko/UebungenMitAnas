@@ -36,11 +36,11 @@ exports.backendLogin = async function loginUser(req, res) {
 exports.backendRegistration = async function createUser(req, res) {
     try {
         const htmlBackToLogin = '<br><a href="/login">Jetzt Einloggen!</a>';
-        const htmlBackToRegister = '<br><a href="/registrieren">Zurück zum Registrieren?</a>'
-        const { username, password } = req.body;
+        const htmlBackToRegister = '<br><a href="/registrieren">Zurück zum Registrieren?</a>';
+        const { username, password, email } = req.body;
 
-        if (!username || !password) {
-            return res.status(400).send('Benutzername und Passwort sind erforderlich' + htmlBackToRegister);
+        if (!username || !password || !email) {
+            return res.status(400).send('Benutzername, Passwort und E-Mail sind erforderlich' + htmlBackToRegister);
         }
 
         const existingUser = await User.findOne({ username });
@@ -51,12 +51,12 @@ exports.backendRegistration = async function createUser(req, res) {
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         const newUser = new User({
-            username: username,
-            password: hashedPassword
+            username,
+            password: hashedPassword,
+            email 
         });
-        console.log('Neuer Benutzer:', newUser);
-        await newUser.save();
 
+        await newUser.save();
         res.status(200).send('Erfolgreich registriert: ' + newUser.username + htmlBackToLogin);
     } catch (err) {
         console.error('Fehler bei der Registrierung:', err);
@@ -119,7 +119,7 @@ exports.editOrUpdateUser = async function editOrUpdateUser(req, res) {
 
 exports.addUser = async function addUser(req, res) {
     try {
-        const { username, password } = req.body;
+        const { username, password, email } = req.body;
 
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -127,6 +127,7 @@ exports.addUser = async function addUser(req, res) {
         const newUser = new User({
             username: username,
             password: hashedPassword,
+            email: email,
             role: 'user'
         });
 
