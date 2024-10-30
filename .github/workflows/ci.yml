@@ -60,24 +60,32 @@ jobs:
           # Hole die Ergebnisse der Tests und Linter aus den Umgebungsvariablen
           TEST_ERRORS="${{ env.TEST_RESULT }}"
           LINT_ERRORS="${{ env.LINT_RESULT }}"
-
+  
+          # Protokolliere die Variablen
+          echo "TEST_ERRORS: $TEST_ERRORS"
+          echo "LINT_ERRORS: $LINT_ERRORS"
+          
           # Überprüfe, ob Fehler aufgetreten sind
           if [ "$TEST_ERRORS" != "Keine Fehler gefunden" ] || [ "$LINT_ERRORS" != "Keine Fehler gefunden" ]; then
             # Sende Fehlernachricht
             MESSAGE="Testfehler:\n$TEST_ERRORS\nLinting-Fehler:\n$LINT_ERRORS"
             echo "Sending error message..."
-            curl -X POST -u "${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}" \
-                -d "type=stream" \
-                -d "to=${{ secrets.ZULIP_CHANNEL }}" \
-                -d "subject=CI Status" \
-                -d "content=$MESSAGE"
+            curl_command="curl -X POST -u \"${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}\" \
+                -d \"type=stream\" \
+                -d \"to=${{ secrets.ZULIP_CHANNEL }}\" \
+                -d \"subject=CI Status\" \
+                -d \"content=$MESSAGE\" https://ihkprojekt.zulipchat.com/api/v1/messages"
+            echo "Curl command: $curl_command"  # Zeige den Curl-Befehl zur Überprüfung an
+            eval $curl_command || echo "Failed to send message"
           else
             # Sende Erfolgsmeldung
             MESSAGE="Alle Tests und Linter haben erfolgreich bestanden."
             echo "Sending success message..."
-            curl -X POST -u "${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}" \
-                -d "type=stream" \
-                -d "to=${{ secrets.ZULIP_CHANNEL }}" \
-                -d "subject=CI Status" \
-                -d "content=$MESSAGE"
+            curl_command="curl -X POST -u \"${{ secrets.ZULIP_BOT_EMAIL }}:${{ secrets.ZULIP_API_KEY }}\" \
+                -d \"type=stream\" \
+                -d \"to=${{ secrets.ZULIP_CHANNEL }}\" \
+                -d \"subject=CI Status\" \
+                -d \"content=$MESSAGE\" https://ihkprojekt.zulipchat.com/api/v1/messages"
+            echo "Curl command: $curl_command"  # Zeige den Curl-Befehl zur Überprüfung an
+            eval $curl_command || echo "Failed to send message"
           fi
