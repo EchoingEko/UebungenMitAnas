@@ -28,6 +28,7 @@ jobs:
         id: jest
         run: |
           npm test > test_output.log || true  # Leite die Ausgabe in eine Log-Datei und ignoriere den Fehler
+          cat test_output.log  # Gebe die Log-Ausgabe direkt aus
           echo "TEST_RESULT=$(grep -E 'FAIL|ERROR' test_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
 
   lint:
@@ -49,6 +50,7 @@ jobs:
         id: eslint
         run: |
           npm run lint > lint_output.log || true  # Leite die Ausgabe in eine Log-Datei und ignoriere den Fehler
+          cat lint_output.log  # Gebe die Log-Ausgabe direkt aus
           echo "LINT_RESULT=$(grep 'error' lint_output.log || echo 'Keine Fehler gefunden')" >> $GITHUB_ENV
 
   notify:
