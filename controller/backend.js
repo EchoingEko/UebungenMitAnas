@@ -9,6 +9,7 @@ const saltRounds = 10;
 exports.backendLogin = async function loginUser(req, res) {
     try {
         const { username, password } = req.body;
+        
 
         if (!username || !password) {
             return res.status(400).send('Benutzername und Passwort sind erforderlich');
