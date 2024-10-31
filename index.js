@@ -8,6 +8,7 @@ const session = require('express-session');
 const path = require('path');
 const ejs = require('ejs');
 
+
 mongoose.connect('mongodb://localhost/users')
 // mongoose.connect('mongodb://localhost:27017/users')
 .then(() => console.log('Mit MongoDB verbunden'))
