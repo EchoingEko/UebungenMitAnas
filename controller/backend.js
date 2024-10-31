@@ -1,4 +1,6 @@
 const User = require('../models/user.js');
+const fs = require('fs');
+const path = require('path');
 const Transaction = require('../models/transactions.js');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
@@ -9,7 +11,7 @@ const saltRounds = 10;
 exports.backendLogin = async function loginUser(req, res) {
     try {
         const { username, password } = req.body;
-        
+
 
         if (!username || !password) {
             return res.status(400).send('Benutzername und Passwort sind erforderlich');
@@ -54,7 +56,7 @@ exports.backendRegistration = async function createUser(req, res) {
         const newUser = new User({
             username,
             password: hashedPassword,
-            email 
+            email
         });
 
         await newUser.save();
@@ -64,6 +66,8 @@ exports.backendRegistration = async function createUser(req, res) {
         res.status(500).send('Interner Serverfehler');
     }
 };
+
+
 
 exports.editOrUpdateUser = async function editOrUpdateUser(req, res) {
     const userId = req.params.id;
@@ -76,26 +80,14 @@ exports.editOrUpdateUser = async function editOrUpdateUser(req, res) {
                 return res.status(404).send('Benutzer nicht gefunden');
             }
 
-            res.send(`
-                <h1>Benutzerdetails bearbeiten</h1>
-                <form action="/update/${user._id}" method="POST">
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" value="${user.username}" required>
-                    <br>
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password">
-                    <br>
-                    <button type="submit">Änderungen speichern</button>
-                </form>
-                <a href="/">Zurück zur Startseite</a>
-            `);
+            res.render('editUser', { user });
         } catch (error) {
             console.error('Fehler beim Abrufen des Benutzers:', error);
             res.status(500).send('Interner Serverfehler');
         }
     } else if (req.method === 'POST') {
         try {
-            const { username, password } = req.body;
+            const { username, password, email } = req.body;
 
             const user = await User.findById(userId);
 
@@ -107,6 +99,7 @@ exports.editOrUpdateUser = async function editOrUpdateUser(req, res) {
                 user.password = await bcrypt.hash(password, saltRounds);
             }
             user.username = username;
+            user.email = email;  
 
             await user.save();
 
@@ -117,6 +110,8 @@ exports.editOrUpdateUser = async function editOrUpdateUser(req, res) {
         }
     }
 };
+
+
 
 exports.addUser = async function addUser(req, res) {
     try {
