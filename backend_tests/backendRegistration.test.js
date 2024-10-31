@@ -7,6 +7,7 @@ const User = require('../models/user.js');
 
 jest.mock('bcrypt');
 jest.mock('../models/user');
+uuu();
 
 describe('backendRegistration', () => {
     let req, res;
