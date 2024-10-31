@@ -23,7 +23,7 @@ jobs:
       - name: Run tests
         run: |
           npm test > test_output.log || true
-          TEST_ERRORS=$(grep -E 'FAIL|ERROR' test_output.log || echo '')
+          TEST_ERRORS=$(grep -Ei 'FAIL|ERROR' test_output.log || echo '')
           echo "TEST_ERRORS=$TEST_ERRORS" >> $GITHUB_ENV
 
   lint:
